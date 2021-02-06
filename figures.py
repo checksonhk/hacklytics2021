@@ -632,96 +632,96 @@ positive_pct_change = list(cases.positive_pct_change)
 date = list(cases.date_new)
 
 # Create fig16ure with secondary y-axis
-fig16 = make_subplots(specs=[[{"secondary_y": True}]])
+# fig16 = make_subplots(specs=[[{"secondary_y": True}]])
 
-# Add traces
-fig16.add_trace(
-    go.Bar(x=date
-           ,y=negativeIncrease
-           ,name="negativeIncrease"
-           ,marker_color=px.colors.qualitative.Pastel1[3]),
-    secondary_y=False,
-)
-fig16.add_trace(
-    go.Bar(x=date, y=positiveIncrease, name="positiveIncrease"),
-    secondary_y=False,
-)
-fig16.add_trace(
-    go.Scatter(x=date
-               ,y=totalTestResultsIncrease
-               ,opacity=.7
-               ,name="totalTestResultsIncrease"
-               ,mode="markers"
-               ,marker_color=px.colors.qualitative.Plotly[3]),
-    secondary_y=False,
-)
-fig16.add_trace(
-    go.Scatter(x=date
-               ,y=percent_negative
-               ,name="percent_negative"
-               ,marker_color=px.colors.qualitative.Plotly[2]),
-    secondary_y=True,
-)
-fig16.add_trace(
-    go.Scatter(x=date
-               ,y=percent_positive
-               ,name="percent_positive"
-               ,marker_color=px.colors.qualitative.D3[3]),
-    secondary_y=True,
-)
-fig16.add_trace(
-    go.Scatter(x=date
-               ,y=positive_pct_change
-               ,name="positive_pct_change"
-               ,marker_color=px.colors.qualitative.T10[2]),
-    secondary_y=True,
-)
-fig16.add_trace(
-    go.Scatter(x=date
-               ,y=negative_pct_change
-               ,name="negative_pct_change"
-               ,marker_color=px.colors.qualitative.Plotly[5]),
-    secondary_y=True,
-)
-fig16.add_trace(
-    go.Scatter(x=date
-               ,y=total_cases_pct_change
-               ,name="total_cases_pct_change"
-               ,marker_color=px.colors.qualitative.Plotly[3]),
-    secondary_y=True,
-)
+# # Add traces
+# fig16.add_trace(
+#     go.Bar(x=date
+#            ,y=negativeIncrease
+#            ,name="negativeIncrease"
+#            ,marker_color=px.colors.qualitative.Pastel1[3]),
+#     secondary_y=False,
+# )
+# fig16.add_trace(
+#     go.Bar(x=date, y=positiveIncrease, name="positiveIncrease"),
+#     secondary_y=False,
+# )
+# fig16.add_trace(
+#     go.Scatter(x=date
+#                ,y=totalTestResultsIncrease
+#                ,opacity=.7
+#                ,name="totalTestResultsIncrease"
+#                ,mode="markers"
+#                ,marker_color=px.colors.qualitative.Plotly[3]),
+#     secondary_y=False,
+# )
+# fig16.add_trace(
+#     go.Scatter(x=date
+#                ,y=percent_negative
+#                ,name="percent_negative"
+#                ,marker_color=px.colors.qualitative.Plotly[2]),
+#     secondary_y=True,
+# )
+# fig16.add_trace(
+#     go.Scatter(x=date
+#                ,y=percent_positive
+#                ,name="percent_positive"
+#                ,marker_color=px.colors.qualitative.D3[3]),
+#     secondary_y=True,
+# )
+# fig16.add_trace(
+#     go.Scatter(x=date
+#                ,y=positive_pct_change
+#                ,name="positive_pct_change"
+#                ,marker_color=px.colors.qualitative.T10[2]),
+#     secondary_y=True,
+# )
+# fig16.add_trace(
+#     go.Scatter(x=date
+#                ,y=negative_pct_change
+#                ,name="negative_pct_change"
+#                ,marker_color=px.colors.qualitative.Plotly[5]),
+#     secondary_y=True,
+# )
+# fig16.add_trace(
+#     go.Scatter(x=date
+#                ,y=total_cases_pct_change
+#                ,name="total_cases_pct_change"
+#                ,marker_color=px.colors.qualitative.Plotly[3]),
+#     secondary_y=True,
+# )
 
 
-# Add fig16ure title
-fig16.update_layout(
-    title_text="<b>Daily Covid Cases</b>"
-    ,height=800
-    # ,width=1200
-)
+# # Add fig16ure title
+# fig16.update_layout(
+#     title_text="<b>Daily Covid Cases</b>"
+#     ,height=800
+#     # ,width=1200
+# )
 
-# Set x-axis title
-fig16.update_xaxes(title_text="<b>Date</b>")
+# # Set x-axis title
+# fig16.update_xaxes(title_text="<b>Date</b>")
 
-# Set y-axes titles
-fig16.update_yaxes(title_text="<b>Count Cases</b>", secondary_y=False)
-fig16.update_yaxes(title_text="<b>% Change</b>", secondary_y=True)
+# # Set y-axes titles
+# fig16.update_yaxes(title_text="<b>Count Cases</b>", secondary_y=False)
+# fig16.update_yaxes(title_text="<b>% Change</b>", secondary_y=True)
 
-# Change the bar mode
-fig16.update_layout(barmode='stack')
+# # Change the bar mode
+# fig16.update_layout(barmode='stack')
 
-# Customize aspect
-fig16.update_traces(marker_line_width=.01)
+# # Customize aspect
+# fig16.update_traces(marker_line_width=.01)
 
-#update legend
-fig16.update_layout(
-    template='plotly_dark'
-    ,legend=dict(
-    orientation="h",
-    yanchor="bottom",
-    y=1.02,
-    xanchor="right",
-    x=1
-))
+# #update legend
+# fig16.update_layout(
+#     template='plotly_dark'
+#     ,legend=dict(
+#     orientation="h",
+#     yanchor="bottom",
+#     y=1.02,
+#     xanchor="right",
+#     x=1
+# ))
 # fig16.show()
 
 

@@ -61,7 +61,7 @@ app = dash.Dash(__name__,
 #-------------------------------------------------------------
 #run app layout things
 # import required figures
-from figures import fig0, fig1, fig2, fig3, fig8, fig15, fig16, fig17, fig33
+from figures import fig0, fig1, fig2, fig3, fig8, fig17, fig33
 
 app.layout = html.Div(children=[
         html.H1(children='A Deeper Look into the Analytics of Covid-19')
@@ -113,16 +113,6 @@ app.layout = html.Div(children=[
 
         ,html.Br(),
 
-        html.Div([
-        html.H2("Figure 3"),
-        dcc.Graph(figure=fig16)
-        ])
-
-        ,html.Br()
-        ,html.Br()
-        ,html.Br()
-        ,html.Br(),
-
         html.H1(children='Breakdown of Figure 3')
 
         ,html.Br(),
@@ -145,12 +135,6 @@ app.layout = html.Div(children=[
 
         html.Div([
         dcc.Graph(figure=fig8)
-        ])
-
-        ,html.Br(),
-
-        html.Div([
-        dcc.Graph(figure=fig15)
         ])
 
         ,html.Br(),
