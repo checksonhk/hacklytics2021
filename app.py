@@ -4,6 +4,7 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
+from dash import dependencies
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
@@ -61,11 +62,17 @@ app = dash.Dash(__name__,
 #-------------------------------------------------------------
 #run app layout things
 # import required figures
-from figures import fig0, fig1, fig2, fig3, fig8, fig17, fig33
+from figures import df, cases, fig0, fig1, fig2, fig3, fig8, fig17, fig33
+available_selectors = list(cases.columns)[1:]
 
 app.layout = html.Div(children=[
         html.H1(children='A Deeper Look into the Analytics of Covid-19')
-
+        ,html.Div([
+            dcc.Dropdown(
+                id='figure1-yaxis-column',
+                options=[{'label': i, 'value': i} for i in available_selectors],
+                value='totalTestResultsIncrease')
+        ])
         ,html.Br(),
 
         html.Div(children='''
@@ -91,12 +98,19 @@ app.layout = html.Div(children=[
         ''')
 
         ,html.Br(),
+        
+    html.Div(dcc.DatePickerRange(
+        id='figure1-xaxis--datepicker',
+        min_date_allowed=min(df['date_new']),
+        max_date_allowed=max(df['date_new']),
+        initial_visible_month=max(df['date_new']),
+        end_date=max(df['date_new'])
+    ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
 
     html.Div([
         html.Div([
         html.H2("Figure 1"),
-        dcc.Graph(figure=fig0)
-        # ])
+        dcc.Graph(id='figure1-bar')
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
@@ -156,6 +170,26 @@ app.layout = html.Div(children=[
         dcc.Graph(figure=fig33)
         ])
 ])
+
+@app.callback(
+    Output('figure1-bar', 'figure'),
+    [Input('figure1-yaxis-column','value'),
+    Input('figure1-xaxis--datepicker',  component_property = 'start_date'),
+    Input('figure1-xaxis--datepicker',  component_property = 'end_date')
+    ])
+def update_graph(yaxis_column_name, start_date, end_date):
+  dff = df[(df['date_new'] > start_date) & (df['date_new'] < end_date)]
+  fig = px.bar(dff
+             ,x="date_new"
+             ,y=yaxis_column_name
+             ,hover_data=['totalTestResults']
+             ,title="<b>Total Covid Tests (Cummulative)</b>")
+  
+  fig.update_layout(
+    template='plotly_dark'
+)
+  return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True, port='4000')
