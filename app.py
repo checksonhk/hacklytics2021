@@ -119,7 +119,6 @@ app.layout = html.Div(children=[
         html.Div([
         html.H2("Figure 2"),
         dcc.Graph(figure=fig1)
-        # ])
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
@@ -178,7 +177,8 @@ app.layout = html.Div(children=[
     Input('figure1-xaxis--datepicker',  component_property = 'end_date')
     ])
 def update_graph(yaxis_column_name, start_date, end_date):
-  dff = df[(df['date_new'] > start_date) & (df['date_new'] < end_date)]
+    
+  dff = df[(df['date_new'] > start_date) & (df['date_new'] < end_date)] if start_date is not None and end_date is not None else df
   fig = px.bar(dff
              ,x="date_new"
              ,y=yaxis_column_name
