@@ -19,9 +19,10 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 
-import csv
-from urllib.request import urlopen
-import urllib.request
+# import csv
+# from urllib.request import urlopen
+# import urllib.request
+from helpers import format_us_state
 
 
 bgcolors = {
@@ -62,11 +63,19 @@ app = dash.Dash(__name__,
 #-------------------------------------------------------------
 #run app layout things
 # import required figures
-from figures import df, cases, fig0, fig1, fig2, fig3, fig8, fig17, fig33
+from figures import df, cases, fig1
 available_selectors = list(cases.columns)[1:]
+available_states = df['state'].unique()
+
 
 app.layout = html.Div(children=[
         html.H1(children='A Deeper Look into the Analytics of Covid-19')
+        ,html.Div([
+            dcc.Dropdown(
+                id='state-selection',
+                options=[{'label': format_us_state(i), 'value': i} for i in available_states],
+                value='AK')
+        ])
         ,html.Div([
             dcc.Dropdown(
                 id='figure1-yaxis-column',
@@ -101,10 +110,11 @@ app.layout = html.Div(children=[
         
     html.Div(dcc.DatePickerRange(
         id='figure1-xaxis--datepicker',
-        min_date_allowed=min(df['date_new']),
-        max_date_allowed=max(df['date_new']),
-        initial_visible_month=max(df['date_new']),
-        end_date=max(df['date_new'])
+        min_date_allowed=min(df['date']),
+        max_date_allowed=max(df['date']),
+        initial_visible_month=max(df['date']),
+        start_date = min(df['date']),
+        end_date=max(df['date'])
     ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
 
     html.Div([
@@ -124,63 +134,21 @@ app.layout = html.Div(children=[
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
     ], className="row")
-
-        ,html.Br(),
-
-        html.H1(children='Breakdown of Figure 3')
-
-        ,html.Br(),
-
-        html.Div([
-        dcc.Graph(figure=fig2)
-        ])
-
-        ,html.Br(),
-
-        html.Div([
-        dcc.Graph(figure=fig3)
-        ])
-
-        ,html.Br(),
-
-        html.H1(children='Distribution Trends of Daily Outcomes')
-
-        ,html.Br(),
-
-        html.Div([
-        dcc.Graph(figure=fig8)
-        ])
-
-        ,html.Br(),
-
-        html.H1(children='Day of Week Meets Daily Outcomes')
-
-        ,html.Br(),
-
-        html.Div([
-        dcc.Graph(figure=fig17)
-        ])
-        ,html.Br(),
-
-        html.H1(children='5 Day Moving Average Meets % of Daily Outcomes (Rounded)')
-
-        ,html.Br(),
-
-        html.Div([
-        dcc.Graph(figure=fig33)
-        ])
 ])
 
 @app.callback(
     Output('figure1-bar', 'figure'),
-    [Input('figure1-yaxis-column','value'),
-    Input('figure1-xaxis--datepicker',  component_property = 'start_date'),
-    Input('figure1-xaxis--datepicker',  component_property = 'end_date')
+    [
+      Input("state-selection", 'value'),
+      Input('figure1-yaxis-column','value'),
+      Input('figure1-xaxis--datepicker',  component_property = 'start_date'),
+      Input('figure1-xaxis--datepicker',  component_property = 'end_date')
     ])
-def update_graph(yaxis_column_name, start_date, end_date):
-  dff = df[(df['date_new'] > start_date) & (df['date_new'] < end_date)]
-  fig = px.bar(dff
-             ,x="date_new"
+def update_graph(state, yaxis_column_name, start_date, end_date):
+  dff = df[df['state'] == state]
+  dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
+  fig = px.bar(dfff
+             ,x="date"
              ,y=yaxis_column_name
              ,hover_data=['totalTestResults']
              ,title="<b>Total Covid Tests (Cummulative)</b>")
