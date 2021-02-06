@@ -129,7 +129,6 @@ app.layout = html.Div(children=[
         html.Div([
         html.H2("Figure 2"),
         dcc.Graph(figure=fig1)
-        # ])
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
