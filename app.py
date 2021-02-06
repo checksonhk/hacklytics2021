@@ -4,134 +4,159 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
-import dash_table
+from dash import dependencies
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+
 import pandas as pd
 import plotly
 import numpy as np
-# import seaborn as sns
+
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
-import csv
-from urllib.request import urlopen
-import urllib.request
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-url = "https://covidtracking.com/api/v1/us/daily.csv"
-df = pd.read_csv(url)
-
-#make new date column
-df['year'] = df.date.astype(str).str[:4]
-df['month_day'] = df.date.astype(str).str[-4:]
-df['day'] = df.date.astype(str).str[-2:]
-df['month'] = df.month_day.astype(str).str[:2]
-df['date_new'] = df['year'] + "-" + df['month'] + "-" + df['day']
+# import csv
+# from urllib.request import urlopen
+# import urllib.request
+from helpers import format_us_state
 
 
+bgcolors = {
+    'background': '#13263a',
+    'text': '#FFFFFF'
+}
 
-df['date_new'] = df['date_new'].astype('datetime64')
-df.dtypes
+#------------------------------
+# external JavaScript files
+external_scripts = [
+    'https://www.google-analytics.com/analytics.js',
+    {'src': 'https://cdn.polyfill.io/v2/polyfill.min.js'},
+    {
+        'src': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.core.js',
+        'integrity': 'sha256-Qqd/EfdABZUcAxjOkMi8eGEivtdTkh3b65xCZL4qAQA=',
+        'crossorigin': 'anonymous'
+    }
+]
 
-# create new df for test result
-cases = df[['date_new', 'totalTestResultsIncrease', 'negativeIncrease', 'positiveIncrease', 'deathIncrease', 'hospitalizedIncrease']]
-# cases.head(20).style.background_gradient(cmap='Pastel1')
+# external CSS stylesheets
+external_stylesheets = [
+    'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    {
+        'href': 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css',
+        'rel': 'stylesheet',
+        'integrity': 'sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO',
+        'crossorigin': 'anonymous'
+    }
+]
 
-
-#create percent columns
-cases['percent_positive'] = cases['positiveIncrease']/cases['totalTestResultsIncrease']
-cases['percent_negative'] = cases['negativeIncrease']/cases['totalTestResultsIncrease']
-cases['percent_death'] = cases['deathIncrease']/cases['totalTestResultsIncrease']
-cases['percent_hospitalized'] = cases['hospitalizedIncrease']/cases['totalTestResultsIncrease']
-# cases.head(20)
-
-
-# create percentage change columns for cases.df
-cases['positive_pct_change'] = cases['percent_positive'].pct_change()
-cases['negative_pct_change'] = cases['percent_negative'].pct_change()
-cases['total_cases_pct_change'] = cases['totalTestResultsIncrease'].pct_change()
-cases['death_pct_change'] = cases['percent_death'].pct_change()
-cases['hospitalized_pct_change'] = cases['percent_hospitalized'].pct_change()
-cases
-
-
-# filter out old dates
-cases = cases[cases['date_new'] > '2020-03-20']
-# cases.head(20).style.background_gradient(cmap="Blues")
-
-percent_positive = list(cases.percent_positive)
-percent_negative = list(cases.percent_negative)
-percent_death = list(cases.percent_death)
-percent_hospitalized = list(cases.percent_hospitalized)
-
-negativeIncrease = list(cases.negativeIncrease)
-positiveIncrease = list(cases.positiveIncrease)
-deathIncrease = list(cases.deathIncrease)
-hospitalizedIncrease = list(cases.hospitalizedIncrease)
-
-totalTestResultsIncrease = list(cases.totalTestResultsIncrease)
-total_cases_pct_change = list(cases.total_cases_pct_change)
-positive_pct_change = list(cases.positive_pct_change)
-negative_pct_change = list(cases.negative_pct_change)
-death_pct_change = list(cases.death_pct_change)
-hospitalized_pct_change = list(cases.hospitalized_pct_change)
-date = list(cases.date_new)
-
-# melt daily percent change columns into one dataframe
-positive_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['positive_pct_change'])
-negative_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['negative_pct_change'])
-death_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['death_pct_change'])
-hospitalized_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['hospitalized_pct_change'])
-total_cases_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['total_cases_pct_change'])
+#-------------------------------------------------------------------------------
+#app stuff
+app = dash.Dash(__name__,
+                external_scripts=external_scripts,
+                external_stylesheets=external_stylesheets)
 
 
-cases_melted1 = positive_pct_melt.append(negative_pct_melt,ignore_index=True)
-cases_melted2 = cases_melted1.append(death_pct_melt,ignore_index=True)
-cases_melted3 = cases_melted2.append(hospitalized_pct_melt,ignore_index=True)
-cases_melted = cases_melted3.append(total_cases_pct_melt,ignore_index=True)
-cases_melted.head()
-cases_melted.variable.value_counts()
+#-------------------------------------------------------------
+#run app layout things
+# import required figures
+from figures import df, cases, fig1
+available_selectors = list(cases.columns)[1:]
+available_states = df['state'].unique()
 
 
+app.layout = html.Div(children=[
+        html.H1(children='A Deeper Look into the Analytics of Covid-19')
+        ,html.Div([
+            dcc.Dropdown(
+                id='state-selection',
+                options=[{'label': format_us_state(i), 'value': i} for i in available_states],
+                value='AK')
+        ])
+        ,html.Div([
+            dcc.Dropdown(
+                id='figure1-yaxis-column',
+                options=[{'label': i, 'value': i} for i in available_selectors],
+                value='totalTestResultsIncrease')
+        ])
+        ,html.Br(),
 
+        html.Div(children='''
+        The purpose of this page is to provide a more in-depth analysis of \
+        the Covid-19 outbreak. The charts on this page offer a range of \
+        analytical views. From daily percent changes and trends for each \
+        day of the week, to the slope and moving averages for each outcome.\
+        ''')
 
-app.layout = html.Div([
-        html.H2("Dataframe"),
-        dash_table.DataTable(
-            id='table',
-            columns=[{"name": i, "id": i, "deletable": True, "selectable": True} for i in df.columns],
-            data=df.to_dict('records'),
-            style_cell = {
-                    'font-family': 'sans-serif',
-                    'font-size': '14px',
-                    'text-align': 'center'
-                },
-            editable=True,
-            filter_action="native",
-            sort_action="native",
-            sort_mode="multi",
-            column_selectable="single",
-            row_selectable="multi",
-            row_deletable=True,
-            selected_columns=[],
-            selected_rows=[],
-            page_action="native",
-            page_current= 0,
-            page_size= 10,
-            style_table={'overflowX': 'scroll'}
-            )
-        ],style={'padding-left': '2%', 'padding-right': '2%'})
+        ,html.Br(),
 
+        html.Div(children='''
+        The data used for this analysis comes from Our World in Data \
+        "https://covidtracking.com/api/v1/us/daily.csv". A more detailed \
+        description of the data can be found here:
+        https://ourworldindata.org/coronavirus-data
+        ''')
 
+        ,html.Br(),
 
+        html.Div(children='''
+        The charts below provide analysis for the United States.
+        ''')
+
+        ,html.Br(),
+        
+    html.Div(dcc.DatePickerRange(
+        id='figure1-xaxis--datepicker',
+        min_date_allowed=min(df['date']),
+        max_date_allowed=max(df['date']),
+        initial_visible_month=max(df['date']),
+        start_date = min(df['date']),
+        end_date=max(df['date'])
+    ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
+
+    html.Div([
+        html.Div([
+        html.H2("Figure 1"),
+        dcc.Graph(id='figure1-bar')
+        ], className="six columns"
+        ,style={'padding-left': '5%', 'padding-right': '5%'})
+
+        ,html.Br(),
+
+        html.Div([
+        html.H2("Figure 2"),
+        dcc.Graph(figure=fig1)
+        ], className="six columns"
+        ,style={'padding-left': '5%', 'padding-right': '5%'})
+
+    ], className="row")
+])
+
+@app.callback(
+    Output('figure1-bar', 'figure'),
+    [
+      Input("state-selection", 'value'),
+      Input('figure1-yaxis-column','value'),
+      Input('figure1-xaxis--datepicker',  component_property = 'start_date'),
+      Input('figure1-xaxis--datepicker',  component_property = 'end_date')
+    ])
+def update_graph(state, yaxis_column_name, start_date, end_date):
+  dff = df[df['state'] == state]
+  dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
+  fig = px.bar(dfff
+             ,x="date"
+             ,y=yaxis_column_name
+             ,hover_data=['totalTestResults']
+             ,title="<b>Total Covid Tests (Cummulative)</b>")
+  
+  fig.update_layout(
+    template='plotly_dark'
+)
+  return fig
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port='4000')
