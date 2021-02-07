@@ -89,7 +89,20 @@ app.layout = html.Div(children=[
         the Covid-19 outbreak. The charts on this page offer a range of \
         analytical views. From daily percent changes and trends for each \
         day of the week, to the slope and moving averages for each outcome.\
-        ''')
+        '''),
+
+        html.Div([dbc.Card(
+    [
+        dbc.CardHeader("New Cases"),
+        dbc.CardBody(
+            [
+                html.H4("201 new Leads", className="card-title"),
+                html.P("Delivered this week compared...", className="card-text"),
+            ]
+        ),
+    ],
+    style={"width": "30rem"},
+)])
 
         ,html.Br(),
 
@@ -136,7 +149,6 @@ app.layout = html.Div(children=[
             {'label': 'Percent Positive', 'value': 'percent_positive'},
         ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative','percent_positive']),
         dcc.Graph(id="selectable-labels"),
-        dcc.Graph(figure=fig1)
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
@@ -178,7 +190,7 @@ def update_graph(value):
             visibility = True
         else:
             visibility = "legendonly"
-        fig_test.add_trace(go.Scatter(x=cases['date_new'], y=cases[val], name=val, visible=visibility), )
+        fig_test.add_trace(go.Scatter(x=cases['date'], y=cases[val], name=val, visible=visibility), )
 
     fig_test.update_layout(
         title_text="<b>Daily Covid Cases with Percent Changes</b>"
