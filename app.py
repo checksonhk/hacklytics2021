@@ -113,25 +113,27 @@ def generate_card(header, icon):
   )
 
 
-state_selection = html.Div(className='d-flex justify-content-between mb-2', children=[
-    html.Label(html.H3("Selected State"), style={"font-weight": "bold"}),
+state_selection = html.Div(className='d-flex justify-content-between align-items-baseline', children=[
+    html.Label(html.H4("Selected State"), style={"font-weight": "bold"}),
     dcc.Dropdown(
+        style=({'width': '100%'}),
         id='state-selection',
         options=[{'label': format_us_state(
             i), 'value': i} for i in available_states],
-        value='AK')
+        value='TX')
 ])
 
 y_axis_selection = html.Div(className='d-flex', children=[
     dcc.Dropdown(
+        style=({'width': '100%'}),
         id='figure1-yaxis-column',
         options=[{'label': i, 'value': i}
                  for i in available_selectors],
         value='totalTestResultsIncrease')
 ])
 
-date_picker = html.Div(className='d-flex justify-content-between mb-2', children=[
-    html.Label(html.H3("Date Range"), style={"font-weight": "bold"}),
+date_picker = html.Div(className='d-flex justify-content-between align-items-baseline', children=[
+    html.Label(html.H4("Date Range"), style={"font-weight": "bold"}),
     dcc.DatePickerRange(
         id='figure1-xaxis--datepicker',
         min_date_allowed=min(df['date']),
