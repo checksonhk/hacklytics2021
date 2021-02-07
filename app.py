@@ -73,7 +73,7 @@ available_selectors = list(cases.columns)[1:]
 available_states = df['state'].unique()
 
 cards = [("new-cases"), ("new-deaths"),
-         ("total-vaccinations")]
+         ("new-hospitalized")]
 
 
 def generate_card(header):
@@ -180,9 +180,38 @@ app.layout = html.Div(children=[
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_new_cases(state, start_date, end_date):
-  dff = df[df['state'] == state]
-  dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
+  dfff = df[(df['state'] == state) & (
+      df['date'] > start_date) & (df['date'] < end_date)]
   new_cases = dfff['positiveIncrease'].sum()
+
+  return new_cases
+
+
+@app.callback(
+    Output(component_id='new-deaths-data', component_property='children'),
+    Input("state-selection", 'value'),
+    Input('figure1-xaxis--datepicker',  component_property='start_date'),
+    Input('figure1-xaxis--datepicker',  component_property='end_date')
+)
+def update_new_deaths(state, start_date, end_date):
+  dfff = df[(df['state'] == state) & (
+      df['date'] > start_date) & (df['date'] < end_date)]
+  new_cases = dfff['deathIncrease'].sum()
+
+  return new_cases
+
+
+@app.callback(
+    Output(component_id='new-hospitalized-data',
+           component_property='children'),
+    Input("state-selection", 'value'),
+    Input('figure1-xaxis--datepicker',  component_property='start_date'),
+    Input('figure1-xaxis--datepicker',  component_property='end_date')
+)
+def update_total_test_results(state, start_date, end_date):
+  dfff = df[(df['state'] == state) & (
+      df['date'] > start_date) & (df['date'] < end_date)]
+  new_cases = dfff['hospitalizedIncrease'].sum()
 
   return new_cases
 
@@ -205,6 +234,12 @@ def update_graph(state, yaxis_column_name, start_date, end_date):
       template='plotly_dark'
   )
   return fig
+
+
+@app.callback(Output('state-selection', 'value'),
+              Input('map', 'clickData'))
+def update_state(clickData):
+  return clickData['points'][0]['location']
 
 
 @app.callback(
