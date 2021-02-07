@@ -143,7 +143,7 @@ date_picker = html.Div(className='d-flex justify-content-between align-items-bas
         end_date=max(df['date'])
     )])
 
-app.layout = html.Div(className='p-5', children=[
+app.layout = html.Div(style=({'padding': '5%'}), children=[
     html.H1(children='A Deeper Look into the Analytics of Covid-19'),
     html.Br(),
     html.Div(children='''
@@ -167,7 +167,7 @@ app.layout = html.Div(className='p-5', children=[
                 className='col-sm-12',
                 children=[dcc.Graph(id="map")]
             ),
-            ]
+        ]
     ),
     html.Br(),
 
@@ -196,8 +196,7 @@ app.layout = html.Div(className='p-5', children=[
                  'value': 'totalTestResultsIncrease'},
                 {'label': 'Percent Negative', 'value': 'percent_negative'},
                 {'label': 'Percent Positive', 'value': 'percent_positive'},
-            ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative', 'percent_positive']
-            , className="form-check", labelClassName="form-check-label", inputClassName="form-check-input", labelStyle={'display': 'inline-block', 'margin': "10px", "font-size": "12px", 'box-sizing':'border-box'}, inputStyle={'box-sizing':'border-box','display': 'inline-block',"padding": "5px", 'margin-right': "3px"}),
+            ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative', 'percent_positive'], className="form-check", labelClassName="form-check-label", inputClassName="form-check-input", labelStyle={'display': 'inline-block', 'margin': "10px", "font-size": "12px", 'box-sizing': 'border-box'}, inputStyle={'box-sizing': 'border-box', 'display': 'inline-block', "padding": "5px", 'margin-right': "3px"}),
             dcc.Graph(id="selectable-labels"),
         ], className="col-sm-6", style={'padding-left': '5%', 'padding-right': '5%'})
 
