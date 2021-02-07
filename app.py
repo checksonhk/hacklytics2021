@@ -128,6 +128,14 @@ app.layout = html.Div(children=[
 
         html.Div([
         html.H2("Figure 2"),
+        dcc.Checklist(id="label-select", options=[
+            {'label': 'Negative Increase', 'value': 'negativeIncrease'},
+            {'label': 'Positive Increase', 'value': 'positiveIncrease'},
+            {'label': 'Total Test Results Increase', 'value': 'totalTestResultsIncrease'},
+            {'label': 'Percent Negative', 'value': 'percent_negative'},
+            {'label': 'Percent Positive', 'value': 'percent_positive'},
+        ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative','percent_positive']),
+        dcc.Graph(id="selectable-labels"),
         dcc.Graph(figure=fig1)
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
@@ -156,6 +164,32 @@ def update_graph(state, yaxis_column_name, start_date, end_date):
     template='plotly_dark'
 )
   return fig
+
+@app.callback(
+      Output('selectable-labels', 'figure'),
+      [Input('label-select', 'value')]
+  )
+def update_graph(value):
+
+    fig_test = make_subplots(specs=[[{"secondary_y": True}]])
+    possible_vals = ['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative','percent_positive']
+    for val in possible_vals:
+        if val in value: 
+            visibility = True
+        else:
+            visibility = "legendonly"
+        fig_test.add_trace(go.Scatter(x=cases['date_new'], y=cases[val], name=val, visible=visibility), )
+
+    fig_test.update_layout(
+        title_text="<b>Daily Covid Cases with Percent Changes</b>"
+        ,template='plotly_dark'
+    )
+
+    # Set x-axis title
+    fig_test.update_xaxes(title_text="<b>Date</b>")
+
+    return fig_test
+
 
 
 if __name__ == '__main__':
