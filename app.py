@@ -72,9 +72,34 @@ app = dash.Dash(__name__,
 available_selectors = list(cases.columns)[1:]
 available_states = df['state'].unique()
 
+cards = [("new-cases"), ("new-deaths"),
+         ("total-vaccinations")]
+
+
+def generate_card(header):
+    return dbc.Card(
+        [
+            dbc.CardHeader(header),
+            dbc.CardBody(
+                [
+                    html.H4(className="card-title", id=f"{header}-data"),
+                ]
+            ),
+        ],
+        className='mb-4',
+    )
+
 
 app.layout = html.Div(children=[
-    html.H1(children='A Deeper Look into the Analytics of Covid-19'), html.Div([
+    html.H1(children='A Deeper Look into the Analytics of Covid-19'),
+    html.Br(),
+    html.Div(children='''
+        The purpose of this page is to provide a more in-depth analysis of \
+        the Covid-19 outbreak. The charts on this page offer a range of \
+        analytical views. From daily percent changes and trends for each \
+        day of the week, to the slope and moving averages for each outcome.\
+        '''),
+    html.Div([
         dcc.Dropdown(
             id='state-selection',
             options=[{'label': format_us_state(
@@ -86,28 +111,23 @@ app.layout = html.Div(children=[
             options=[{'label': i, 'value': i}
                      for i in available_selectors],
             value='totalTestResultsIncrease')
-    ]), html.Br(),
-
-    html.Div(children='''
-        The purpose of this page is to provide a more in-depth analysis of \
-        the Covid-19 outbreak. The charts on this page offer a range of \
-        analytical views. From daily percent changes and trends for each \
-        day of the week, to the slope and moving averages for each outcome.\
-        '''),
-
-    html.Div([dbc.Card(
-        [
-            dbc.CardHeader("New Cases"),
-            dbc.CardBody(
-                [
-                    html.H4("201 new Leads", className="card-title"),
-                    html.P("Delivered this week compared...",
-                           className="card-text"),
-                ]
+    ]),
+    html.Div(
+        className='row',
+        children=[
+            # LEFT SIDE
+            html.Div(
+                className='col-sm-9',
+                children=[dcc.Graph(id="map")]
             ),
-        ],
-        style={"width": "30rem"},
-    )]), html.Br(),
+            # RIGHT SIDE
+            html.Div(
+                className='col-sm-3 d-flex flex-column',
+                children=[html.Div([generate_card(header)
+                                    for header in cards])]
+            )]
+    ),
+    html.Br(),
 
     html.Div(children='''
         The data used for this analysis comes from Our World in Data \
@@ -158,10 +178,21 @@ app.layout = html.Div(children=[
 
     ], className="row"),
 
-    html.Div([
-        dcc.Graph(id="map")
-    ])
 ])
+
+
+@app.callback(
+    Output(component_id='new-cases-data', component_property='children'),
+    Input("state-selection", 'value'),
+    Input('figure1-xaxis--datepicker',  component_property='start_date'),
+    Input('figure1-xaxis--datepicker',  component_property='end_date')
+)
+def update_new_cases(state, start_date, end_date):
+    dff = df[df['state'] == state]
+    dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
+    new_cases = dfff['positiveIncrease'].sum()
+
+    return new_cases
 
 
 @app.callback(
@@ -212,7 +243,7 @@ def update_graph(value):
 
 
 @app.callback(
-    dash.dependencies.Output('map', 'figure'),
+    Output("map", "figure"),
     [
         Input('figure1-xaxis--datepicker',  component_property='start_date'),
         Input('figure1-xaxis--datepicker',  component_property='end_date')
