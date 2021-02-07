@@ -15,7 +15,7 @@ import urllib.request
 # figures for graphs
 from datamodel import df, cases, cases_melted
 
-#make variables for subplots
+# make variables for subplots
 percent_positive = list(cases.percent_positive)
 percent_negative = list(cases.percent_negative)
 percent_death = list(cases.percent_death)
@@ -39,16 +39,11 @@ percent_positive = list(cases.percent_positive)
 percent_negative = list(cases.percent_negative)
 date = list(cases.date)
 
-cases_melt = pd.melt(cases, id_vars=['date'], value_vars=['negativeIncrease'
-                                                              ,'positiveIncrease'
-                                                              ,'totalTestResultsIncrease'
-                                                             ]
-                    )
-fig0 = px.bar(df
-             ,x="date"
-             ,y="totalTestResults"
-             ,hover_data=['totalTestResults']
-             ,title="<b>Total Covid Tests (Cummulative)</b>")
+cases_melt = pd.melt(cases, id_vars=['date'], value_vars=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease'
+                                                          ]
+                     )
+fig0 = px.bar(df, x="date", y="totalTestResults", hover_data=[
+              'totalTestResults'], title="<b>Total Covid Tests (Cummulative)</b>")
 
 # Add figure title
 fig0.update_layout(
@@ -73,8 +68,7 @@ fig1.add_trace(
 
 # Add fig2ure title
 fig1.update_layout(
-    title_text="<b>Daily Covid Cases with Percent Changes</b>"
-    ,template='plotly_dark'
+    title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark'
 )
 
 # Set x-axis title

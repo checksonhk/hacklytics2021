@@ -4,8 +4,8 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 import dash
-from dash import dependencies
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
@@ -94,7 +94,20 @@ app.layout = html.Div(children=[
         the Covid-19 outbreak. The charts on this page offer a range of \
         analytical views. From daily percent changes and trends for each \
         day of the week, to the slope and moving averages for each outcome.\
-        ''')
+        '''),
+
+        html.Div([dbc.Card(
+    [
+        dbc.CardHeader("New Cases"),
+        dbc.CardBody(
+            [
+                html.H4("201 new Leads", className="card-title"),
+                html.P("Delivered this week compared...", className="card-text"),
+            ]
+        ),
+    ],
+    style={"width": "30rem"},
+)])
 
         ,html.Br(),
 
@@ -133,7 +146,14 @@ app.layout = html.Div(children=[
 
         html.Div([
         html.H2("Figure 2"),
-        dcc.Graph(figure=fig1)
+        dcc.Checklist(id="label-select", options=[
+            {'label': 'Negative Increase', 'value': 'negativeIncrease'},
+            {'label': 'Positive Increase', 'value': 'positiveIncrease'},
+            {'label': 'Total Test Results Increase', 'value': 'totalTestResultsIncrease'},
+            {'label': 'Percent Negative', 'value': 'percent_negative'},
+            {'label': 'Percent Positive', 'value': 'percent_positive'},
+        ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative','percent_positive']),
+        dcc.Graph(id="selectable-labels"),
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
@@ -165,6 +185,32 @@ def update_graph(state, yaxis_column_name, start_date, end_date):
     template='plotly_dark'
 )
   return fig
+
+@app.callback(
+      Output('selectable-labels', 'figure'),
+      [Input('label-select', 'value')]
+  )
+def update_graph(value):
+
+    fig_test = make_subplots(specs=[[{"secondary_y": True}]])
+    possible_vals = ['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative','percent_positive']
+    for val in possible_vals:
+        if val in value: 
+            visibility = True
+        else:
+            visibility = "legendonly"
+        fig_test.add_trace(go.Scatter(x=cases['date'], y=cases[val], name=val, visible=visibility), )
+
+    fig_test.update_layout(
+        title_text="<b>Daily Covid Cases with Percent Changes</b>"
+        ,template='plotly_dark'
+    )
+
+    # Set x-axis title
+    fig_test.update_xaxes(title_text="<b>Date</b>")
+
+    return fig_test
+
 
 
 @app.callback(
