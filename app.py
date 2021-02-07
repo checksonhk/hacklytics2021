@@ -19,6 +19,8 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 
+import datetime
+
 from urllib.request import urlopen
 import json
 with urlopen('https://raw.githubusercontent.com/python-visualization/folium/master/tests/us-states.json') as response:
@@ -28,6 +30,7 @@ with urlopen('https://raw.githubusercontent.com/python-visualization/folium/mast
 # from urllib.request import urlopen
 # import urllib.request
 from helpers import format_us_state, format_card_header, format_number
+from forecast import plot_and_predict
 
 from datamodel import df, cases
 
@@ -132,7 +135,6 @@ date_picker = html.Div(className='d-flex justify-content-between mb-2', children
     dcc.DatePickerRange(
         id='figure1-xaxis--datepicker',
         min_date_allowed=min(df['date']),
-        max_date_allowed=max(df['date']),
         initial_visible_month=max(df['date']),
         start_date=min(df['date']),
         end_date=max(df['date'])
@@ -213,8 +215,16 @@ app.layout = html.Div(className='p-5', children=[
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_new_cases(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
+  dff = df[(dff['state'] == state) & (
       df['date'] > start_date) & (df['date'] < end_date)]
+  dfff = dff
+  end_date_obj = datetime.datetime.strptime(end_date.split('T')[0], '%Y-%m-%d')
+  if end_date_obj > max(df['date']):
+    days_diff = (end_date_obj - max(df['date'])).days
+    predicted = plot_and_predict(days_diff, state)
+    predicted['state'] = state
+    dfff = dff.append(predicted)
+
   new_cases = dfff['positiveIncrease'].sum()
 
   return format_number(new_cases)
@@ -227,8 +237,17 @@ def update_new_cases(state, start_date, end_date):
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_new_deaths(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
+  dff = df[(df['state'] == state) & (
       df['date'] > start_date) & (df['date'] < end_date)]
+
+  dfff = dff
+  end_date_obj = datetime.datetime.strptime(end_date.split('T')[0], '%Y-%m-%d')
+  if end_date_obj > max(df['date']):
+    days_diff = (end_date_obj - max(df['date'])).days
+    predicted = plot_and_predict(days_diff, state)
+    predicted['state'] = state
+    dfff = dff.append(predicted)
+
   new_cases = dfff['deathIncrease'].sum()
 
   return format_number(new_cases)
