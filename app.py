@@ -128,6 +128,14 @@ app.layout = html.Div(children=[
         start_date=min(df['date']),
         end_date=max(df['date'])
     ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
+    # html.Div(dcc.Slider(
+    #     id='figure1-xaxis--datepicker',
+    #     min=df['date'].min(),
+    #     max=df['date'].max(),
+    #     value=df['date'].max(),
+    #     marks={str(date): str(date) for date in df['date'].unique()},
+    #     step=None
+    # ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
 
     html.Div([
         html.Div([
@@ -149,7 +157,7 @@ app.layout = html.Div(children=[
         ], className="six columns", style={'padding-left': '5%', 'padding-right': '5%'})
 
     ], className="row"),
-    
+
     html.Div([
         dcc.Graph(id="map")
     ])
@@ -203,28 +211,36 @@ def update_graph(value):
     return fig_test
 
 
-
 @app.callback(
-    Output("map", "figure"), 
+    dash.dependencies.Output('map', 'figure'),
     [
-      Input('figure1-xaxis--datepicker',  component_property = 'start_date'),
-      Input('figure1-xaxis--datepicker',  component_property = 'end_date')
+        Input('figure1-xaxis--datepicker',  component_property='start_date'),
+        Input('figure1-xaxis--datepicker',  component_property='end_date')
     ])
 def display_map(start_date, end_date):
-  map_select = df[(df['date'] > start_date) & (df['date'] < end_date)]
-  map_selected_sum = map_select.groupby(["state"]).positiveIncrease.sum().reset_index()
-  fig_map = px.choropleth_mapbox(map_selected_sum, geojson=map_states, locations=map_selected_sum['state'], color='positiveIncrease',
-                           color_continuous_scale="reds",
-                           mapbox_style="carto-positron",
-                           zoom=3, center = {"lat": 39.0902, "lon": -99},
-                           opacity=0.5,
-                           labels={'positiveIncrease':'Positive Cases'}
-                          )
-  fig_map.update_layout(
-    margin={"r":0,"t":0,"l":0,"b":0}
-  )
+    map_select = df[(df['date'] > start_date) & (df['date'] < end_date)]
+    map_selected_sum = map_select.groupby(
+        ["state"]).positiveIncrease.sum().reset_index()
+    fig_map = px.choropleth_mapbox(map_selected_sum, geojson=map_states, locations=map_selected_sum['state'], color='positiveIncrease',
+                                   color_continuous_scale="reds",
+                                   mapbox_style="carto-positron",
+                                   zoom=3, center={"lat": 39.0902, "lon": -99},
+                                   opacity=0.5,
+                                   labels={
+                                       'positiveIncrease': 'Positive Cases'}
+                                   )
+    fig_map.update_layout(
+        margin={"r": 0, "t": 0, "l": 0, "b": 0}
+    )
 
-  return fig_map
+    return fig_map
+
+
+def handle_click(trace, points, state):
+    print(points.state)
+
+    fig_map.on_click(handle_click)
+
 
 if __name__ == '__main__':
     app.run_server(debug=True, port='4000')
