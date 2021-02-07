@@ -4,19 +4,23 @@ url = "./data/states_covid_history.csv"
 df = pd.read_csv(url)
 
 df['date'] = df['date'].astype('datetime64')
-cases = df[['date', 'totalTestResultsIncrease', 'negativeIncrease',
+cases = df[['date', 'state', 'totalTestResultsIncrease', 'negativeIncrease',
             'positiveIncrease', 'deathIncrease', 'hospitalizedIncrease']]
 # cases.head(20).style.background_gradient(cmap='Pastel1')
 
+intermed_vals = cases.drop(['date', 'state'], axis=1)
+intermed_vals[intermed_vals < 0] = -intermed_vals
+cases.update(intermed_vals)
+
 # create percent columns
 cases['percent_positive'] = cases['positiveIncrease'] / \
-    cases['totalTestResultsIncrease']
+    (cases['positiveIncrease'] + cases['negativeIncrease']) * 100
 cases['percent_negative'] = cases['negativeIncrease'] / \
-    cases['totalTestResultsIncrease']
+    (cases['positiveIncrease'] + cases['negativeIncrease']) * 100
 cases['percent_death'] = cases['deathIncrease'] / \
-    cases['totalTestResultsIncrease']
+    cases['positiveIncrease'] * 100
 cases['percent_hospitalized'] = cases['hospitalizedIncrease'] / \
-    cases['totalTestResultsIncrease']
+    cases['positiveIncrease'] * 100
 # cases.head(20)
 
 # create percent change columns

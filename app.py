@@ -291,24 +291,30 @@ def update_state(clickData):
 
 @ app.callback(
     Output('selectable-labels', 'figure'),
-    [Input('label-select', 'value')]
+    [
+        Input('state-selection', component_property='value'),
+        Input('figure1-xaxis--datepicker',  component_property='start_date'),
+        Input('figure1-xaxis--datepicker',  component_property='end_date'),
+        Input('label-select', component_property='value')
+    ]
 )
-def update_graph(value):
+def update_graph(state_selection, start_date, end_date, display_list):
+  dff = cases[cases['state'] == state_selection]
+  dfff = dff[(dff['date'] > start_date) & (dff['date'] < end_date)]
 
   fig_test = make_subplots(specs=[[{"secondary_y": True}]])
   possible_vals = ['negativeIncrease', 'positiveIncrease',
                    'totalTestResultsIncrease', 'percent_negative', 'percent_positive']
   for val in possible_vals:
-    if val in value:
+    if val in display_list:
       visibility = True
     else:
       visibility = "legendonly"
     fig_test.add_trace(go.Scatter(
-        x=cases['date'], y=cases[val], name=val, visible=visibility), )
+        x=dfff['date'], y=dfff[val], name=val, visible=visibility), )
 
   fig_test.update_layout(
-      title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark'
-  )
+      title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark')
 
   # Set x-axis title
   fig_test.update_xaxes(title_text="<b>Date</b>")
@@ -328,14 +334,27 @@ def display_map(start_date, end_date):
       ["state"]).positiveIncrease.sum().reset_index()
   fig_map = px.choropleth_mapbox(map_selected_sum, geojson=map_states, locations=map_selected_sum['state'], color='positiveIncrease',
                                  color_continuous_scale="reds",
-                                 mapbox_style="carto-positron",
+                                 mapbox_style="carto-darkmatter",
                                  zoom=3, center={"lat": 39.0902, "lon": -99},
                                  opacity=0.5,
-                                 labels={'positiveIncrease': 'Positive Cases'}
+                                 labels={
+                                     'positiveIncrease': 'Positive Cases'}
                                  )
   fig_map.update_layout(
       margin={"r": 0, "t": 0, "l": 0, "b": 0}
   )
+
+  fig_map.update_coloraxes(colorbar=dict(xanchor="right", bgcolor='grey'))
+
+  # fig_map.update_layout(coloraxis=dict(colorbar_x=-0.5,
+  #                                      colorbar_y=0.5,
+  #                                      colorbar_thickness=20,
+  #                                      colorbar_bgcolor='#fff'))
+  # fig_map.update_layout(coloraxis_showscale=False)
+  # fig_map.update_traces(
+  #     reversescale=True,
+  #     colorbar_bgcolor="darkgrey",
+  #     selector=dict(type='choropleth'))
 
   return fig_map
 
