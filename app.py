@@ -19,6 +19,11 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 
+from urllib.request import urlopen
+import json
+with urlopen('https://raw.githubusercontent.com/python-visualization/folium/master/tests/us-states.json') as response:
+    map_states = json.load(response)
+
 # import csv
 # from urllib.request import urlopen
 # import urllib.request
@@ -132,7 +137,11 @@ app.layout = html.Div(children=[
         ], className="six columns"
         ,style={'padding-left': '5%', 'padding-right': '5%'})
 
-    ], className="row")
+    ], className="row"),
+    
+    html.Div([
+        dcc.Graph(id="map")
+    ])
 ])
 
 @app.callback(
@@ -157,6 +166,28 @@ def update_graph(state, yaxis_column_name, start_date, end_date):
 )
   return fig
 
+
+@app.callback(
+    Output("map", "figure"), 
+    [
+      Input('figure1-xaxis--datepicker',  component_property = 'start_date'),
+      Input('figure1-xaxis--datepicker',  component_property = 'end_date')
+    ])
+def display_map(start_date, end_date):
+  map_select = df[(df['date'] > start_date) & (df['date'] < end_date)]
+  map_selected_sum = map_select.groupby(["state"]).positiveIncrease.sum().reset_index()
+  fig_map = px.choropleth_mapbox(map_selected_sum, geojson=map_states, locations=map_selected_sum['state'], color='positiveIncrease',
+                           color_continuous_scale="reds",
+                           mapbox_style="carto-positron",
+                           zoom=3, center = {"lat": 39.0902, "lon": -99},
+                           opacity=0.5,
+                           labels={'positiveIncrease':'Positive Cases'}
+                          )
+  fig_map.update_layout(
+    margin={"r":0,"t":0,"l":0,"b":0}
+  )
+
+  return fig_map
 
 if __name__ == '__main__':
     app.run_server(debug=True, port='4000')
