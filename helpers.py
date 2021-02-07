@@ -67,8 +67,8 @@ state_abbr = {
 
 
 def format_us_state(abbr_state):
-  """
-  Converts abbreviated form of US States into full name
-  eg TX -> Texas
-  """
-  return state_abbr[abbr_state]
+    """
+    Converts abbreviated form of US States into full name
+    eg TX -> Texas
+    """
+    return state_abbr[abbr_state]
