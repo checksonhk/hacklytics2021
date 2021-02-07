@@ -67,7 +67,7 @@ external_stylesheets = [
         'integrity': 'sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf',
         'crossorigin': 'anonymous'
     },
-    dbc.themes.DARKLY
+    dbc.themes.SUPERHERO
 ]
 
 # -------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ app = dash.Dash(__name__,
 # -------------------------------------------------------------
 # run app layout things
 # import required figures
-available_selectors = list(cases.columns)[1:]
+available_selectors = list(cases.columns)[2:]
 available_states = df['state'].unique()
 
 
@@ -116,7 +116,7 @@ def generate_card(header, icon):
 state_selection = html.Div(className='d-flex justify-content-between align-items-baseline', children=[
     html.Label(html.H4("Selected State"), style={"font-weight": "bold"}),
     dcc.Dropdown(
-        style=({'width': '100%'}),
+        style=({'width': '100%', 'color': 'black'}),
         id='state-selection',
         options=[{'label': format_us_state(
             i), 'value': i} for i in available_states],
@@ -135,8 +135,10 @@ y_axis_selection = html.Div(className='d-flex', children=[
 date_picker = html.Div(className='d-flex justify-content-between align-items-baseline', children=[
     html.Label(html.H4("Date Range"), style={"font-weight": "bold"}),
     dcc.DatePickerRange(
+        style=({'color': 'black'}),
         id='figure1-xaxis--datepicker',
         min_date_allowed=min(df['date']),
+        max_date_allowed=max(df['date']),
         initial_visible_month=max(df['date']),
         start_date=min(df['date']),
         end_date=max(df['date'])
