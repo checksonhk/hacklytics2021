@@ -165,14 +165,10 @@ app.layout = html.Div(className='p-5', children=[
         children=[
             # LEFT SIDE
             html.Div(
-                className='col-sm-9',
+                className='col-sm-12',
                 children=[dcc.Graph(id="map")]
             ),
-            # RIGHT SIDE
-            html.Div(
-                className='col-sm-3 d-flex flex-column pt-3',
-                children=[]
-            )]
+            ]
     ),
     html.Br(),
 
