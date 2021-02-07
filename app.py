@@ -106,9 +106,37 @@ def generate_card(header, icon):
                ]
           )
       ],
-      style=({"border-radius": '1rem', 'width': "15%"}),
+      style=({"border-radius": '1rem'}),
   )
 
+
+state_selection = html.Div(className='d-flex justify-content-between mb-2', children=[
+    html.Label(html.H3("Selected State"), style={"font-weight": "bold"}),
+    dcc.Dropdown(
+        id='state-selection',
+        options=[{'label': format_us_state(
+            i), 'value': i} for i in available_states],
+        value='AK')
+])
+
+y_axis_selection = html.Div(className='d-flex', children=[
+    dcc.Dropdown(
+        id='figure1-yaxis-column',
+        options=[{'label': i, 'value': i}
+                 for i in available_selectors],
+        value='totalTestResultsIncrease')
+])
+
+date_picker = html.Div(className='d-flex justify-content-between mb-2', children=[
+    html.Label(html.H3("Date Range"), style={"font-weight": "bold"}),
+    dcc.DatePickerRange(
+        id='figure1-xaxis--datepicker',
+        min_date_allowed=min(df['date']),
+        max_date_allowed=max(df['date']),
+        initial_visible_month=max(df['date']),
+        start_date=min(df['date']),
+        end_date=max(df['date'])
+    )])
 
 app.layout = html.Div(className='p-5', children=[
     html.H1(children='A Deeper Look into the Analytics of Covid-19'),
@@ -119,23 +147,13 @@ app.layout = html.Div(className='p-5', children=[
         analytical views. From daily percent changes and trends for each \
         day of the week, to the slope and moving averages for each outcome.\
         '''),
-    html.Div([
-        dcc.Dropdown(
-            id='state-selection',
-            options=[{'label': format_us_state(
-                i), 'value': i} for i in available_states],
-            value='AK')
-    ]), html.Div([
-        dcc.Dropdown(
-            id='figure1-yaxis-column',
-            options=[{'label': i, 'value': i}
-                     for i in available_selectors],
-            value='totalTestResultsIncrease')
-    ]),
     html.Div(
-        children=[html.Div(className='d-flex justify-content-around mb-4',
-                           children=[generate_card(header, icon) for header, icon in cards])]
-    ),
+        className='row align-items-baseline',
+        children=[html.Div(className='col-sm-5', children=[html.Div(className='filters d-flex flex-column', children=[state_selection, date_picker])]),
+                  html.Div(className='col-sm-7', children=[html.Div(className='d-flex justify-content-around my-4',
+                                                                    children=[generate_card(header, icon) for header, icon in cards])]),
+
+                  ]),
     html.Div(
         className='row',
         children=[
@@ -163,17 +181,9 @@ app.layout = html.Div(className='p-5', children=[
         The charts below provide analysis for the United States.
         '''), html.Br(),
 
-    html.Div(dcc.DatePickerRange(
-        id='figure1-xaxis--datepicker',
-        min_date_allowed=min(df['date']),
-        max_date_allowed=max(df['date']),
-        initial_visible_month=max(df['date']),
-        start_date=min(df['date']),
-        end_date=max(df['date'])
-    ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
-
     html.Div([
         html.Div([
+            y_axis_selection,
             html.H2("Figure 1"),
             dcc.Graph(id='figure1-bar')
         ], className="six columns", style={'padding-left': '5%', 'padding-right': '5%'}), html.Br(),
@@ -196,7 +206,7 @@ app.layout = html.Div(className='p-5', children=[
 ])
 
 
-@app.callback(
+@ app.callback(
     Output(component_id='new-cases-data', component_property='children'),
     Input("state-selection", 'value'),
     Input('figure1-xaxis--datepicker',  component_property='start_date'),
@@ -210,7 +220,7 @@ def update_new_cases(state, start_date, end_date):
   return format_number(new_cases)
 
 
-@app.callback(
+@ app.callback(
     Output(component_id='new-deaths-data', component_property='children'),
     Input("state-selection", 'value'),
     Input('figure1-xaxis--datepicker',  component_property='start_date'),
@@ -224,7 +234,7 @@ def update_new_deaths(state, start_date, end_date):
   return format_number(new_cases)
 
 
-@app.callback(
+@ app.callback(
     Output(component_id='new-hospitalized-data',
            component_property='children'),
     Input("state-selection", 'value'),
@@ -239,7 +249,7 @@ def update_total_test_results(state, start_date, end_date):
   return format_number(new_cases)
 
 
-@app.callback(
+@ app.callback(
     Output(component_id='total-recovered-data',
            component_property='children'),
     Input("state-selection", 'value'),
@@ -247,14 +257,13 @@ def update_total_test_results(state, start_date, end_date):
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_total_recovered(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
-      df['date'] > start_date) & (df['date'] < end_date)]
-  total_recovered = int(dfff['recovered'].sum())
+  dfff = df[(df['state'] == state) & (df['date'] == end_date)]
+  total_recovered = dfff['recovered']
 
-  return format_number(total_recovered)
+  return format_number(int(total_recovered))
 
 
-@app.callback(
+@ app.callback(
     Output('figure1-bar', 'figure'),
     [
         Input("state-selection", 'value'),
@@ -266,7 +275,7 @@ def update_graph(state, yaxis_column_name, start_date, end_date):
   dff = df[df['state'] == state]
   dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
   fig = px.bar(dfff, x="date", y=yaxis_column_name, hover_data=[
-               'totalTestResults'], title="<b>Total Covid Tests (Cummulative)</b>")
+      'totalTestResults'], title="<b>Total Covid Tests (Cummulative)</b>")
 
   fig.update_layout(
       template='plotly_dark'
@@ -274,13 +283,13 @@ def update_graph(state, yaxis_column_name, start_date, end_date):
   return fig
 
 
-@app.callback(Output('state-selection', 'value'),
-              Input('map', 'clickData'))
+@ app.callback(Output('state-selection', 'value'),
+               Input('map', 'clickData'))
 def update_state(clickData):
   return clickData['points'][0]['location']
 
 
-@app.callback(
+@ app.callback(
     Output('selectable-labels', 'figure'),
     [Input('label-select', 'value')]
 )
@@ -307,7 +316,7 @@ def update_graph(value):
   return fig_test
 
 
-@app.callback(
+@ app.callback(
     Output("map", "figure"),
     [
         Input('figure1-xaxis--datepicker',  component_property='start_date'),
