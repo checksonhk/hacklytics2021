@@ -1,28 +1,11 @@
 import pandas as pd
 
-
-url = "./data/daily.csv"
+url = "./data/states_covid_history.csv"
 df = pd.read_csv(url)
-# df.head()
 
-
-#make new date column
-df['year'] = df.date.astype(str).str[:4]
-df['month_day'] = df.date.astype(str).str[-4:]
-df['day'] = df.date.astype(str).str[-2:]
-df['month'] = df.month_day.astype(str).str[:2]
-df['date_new'] = df['year'] + "-" + df['month'] + "-" + df['day']
-
-# df.head()
-
-
-df['date_new'] = df['date_new'].astype('datetime64')
-df.dtypes
-
-
-cases = df[['date_new', 'totalTestResultsIncrease', 'negativeIncrease', 'positiveIncrease', 'deathIncrease', 'hospitalizedIncrease']]
+df['date'] = df['date'].astype('datetime64')
+cases = df[['date', 'totalTestResultsIncrease', 'negativeIncrease', 'positiveIncrease', 'deathIncrease', 'hospitalizedIncrease']]
 # cases.head(20).style.background_gradient(cmap='Pastel1')
-
 
 #create percent columns
 cases['percent_positive'] = cases['positiveIncrease']/cases['totalTestResultsIncrease']
@@ -40,16 +23,16 @@ cases['hospitalized_pct_change'] = cases['percent_hospitalized'].pct_change()
 # cases
 
 #filter out old dates
-cases = cases[cases['date_new'] > '2020-03-20']
+cases = cases[cases['date'] > '2020-03-20']
 # cases.head(20).style.background_gradient(cmap="Blues")
 
 
 #melt daily percent change columns into one dataframe
-positive_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['positive_pct_change'])
-negative_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['negative_pct_change'])
-death_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['death_pct_change'])
-hospitalized_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['hospitalized_pct_change'])
-total_cases_pct_melt = pd.melt(cases, id_vars=['date_new'],value_vars=['total_cases_pct_change'])
+positive_pct_melt = pd.melt(cases, id_vars=['date'],value_vars=['positive_pct_change'])
+negative_pct_melt = pd.melt(cases, id_vars=['date'],value_vars=['negative_pct_change'])
+death_pct_melt = pd.melt(cases, id_vars=['date'],value_vars=['death_pct_change'])
+hospitalized_pct_melt = pd.melt(cases, id_vars=['date'],value_vars=['hospitalized_pct_change'])
+total_cases_pct_melt = pd.melt(cases, id_vars=['date'],value_vars=['total_cases_pct_change'])
 
 
 cases_melted1 = positive_pct_melt.append(negative_pct_melt,ignore_index=True)
