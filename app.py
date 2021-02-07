@@ -22,7 +22,7 @@ import plotly.figure_factory as ff
 from urllib.request import urlopen
 import json
 with urlopen('https://raw.githubusercontent.com/python-visualization/folium/master/tests/us-states.json') as response:
-  map_states = json.load(response)
+    map_states = json.load(response)
 
 # import csv
 # from urllib.request import urlopen
@@ -82,9 +82,9 @@ available_states = df['state'].unique()
 
 
 def generate_icon(icon_name):
-  return html.Span(
-      style=({'width': '5rem', 'height': '5rem'}),
-      children=html.I(className=f"{icon_name} fa-3x"))
+    return html.Span(
+        style=({'width': '5rem', 'height': '5rem'}),
+        children=html.I(className=f"{icon_name} fa-3x"))
 
 
 cards = [("new-cases", "fas fa-globe-americas"), ("new-deaths", 'fas fa-skull-crossbones'),
@@ -92,22 +92,22 @@ cards = [("new-cases", "fas fa-globe-americas"), ("new-deaths", 'fas fa-skull-cr
 
 
 def generate_card(header, icon):
-  return dbc.Card(
-      [
-          dbc.CardBody(
-              [html.Div(className='row',
-                        children=[
-                            html.Div(className='col', children=[html.H5(format_card_header(header), className='card-title text-nowrap'),
-                                                                html.H2(className="card-stats",
-                                                                        id=f"{header}-data")]),
-                            html.Div(html.P(generate_icon(icon)),
-                                     className='col auto')
-                        ])
-               ]
-          )
-      ],
-      style=({"border-radius": '1rem', 'width': "15%"}),
-  )
+    return dbc.Card(
+        [
+            dbc.CardBody(
+                [html.Div(className='row',
+                          children=[
+                              html.Div(className='col', children=[html.H5(format_card_header(header), className='card-title text-nowrap'),
+                                                                  html.H2(className="card-stats",
+                                                                          id=f"{header}-data")]),
+                              html.Div(html.P(generate_icon(icon)),
+                                       className='col auto')
+                          ])
+                 ]
+            )
+        ],
+        style=({"border-radius": '1rem', 'width': "15%"}),
+    )
 
 
 app.layout = html.Div(className='p-5', children=[
@@ -203,11 +203,11 @@ app.layout = html.Div(className='p-5', children=[
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_new_cases(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
-      df['date'] > start_date) & (df['date'] < end_date)]
-  new_cases = dfff['positiveIncrease'].sum()
+    dfff = df[(df['state'] == state) & (
+        df['date'] > start_date) & (df['date'] < end_date)]
+    new_cases = dfff['positiveIncrease'].sum()
 
-  return format_number(new_cases)
+    return format_number(new_cases)
 
 
 @app.callback(
@@ -217,11 +217,11 @@ def update_new_cases(state, start_date, end_date):
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_new_deaths(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
-      df['date'] > start_date) & (df['date'] < end_date)]
-  new_cases = dfff['deathIncrease'].sum()
+    dfff = df[(df['state'] == state) & (
+        df['date'] > start_date) & (df['date'] < end_date)]
+    new_cases = dfff['deathIncrease'].sum()
 
-  return format_number(new_cases)
+    return format_number(new_cases)
 
 
 @app.callback(
@@ -232,11 +232,11 @@ def update_new_deaths(state, start_date, end_date):
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_total_test_results(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
-      df['date'] > start_date) & (df['date'] < end_date)]
-  new_cases = dfff['hospitalizedIncrease'].sum()
+    dfff = df[(df['state'] == state) & (
+        df['date'] > start_date) & (df['date'] < end_date)]
+    new_cases = dfff['hospitalizedIncrease'].sum()
 
-  return format_number(new_cases)
+    return format_number(new_cases)
 
 
 @app.callback(
@@ -247,11 +247,11 @@ def update_total_test_results(state, start_date, end_date):
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_total_recovered(state, start_date, end_date):
-  dfff = df[(df['state'] == state) & (
-      df['date'] > start_date) & (df['date'] < end_date)]
-  total_recovered = int(dfff['recovered'].sum())
+    dfff = df[(df['state'] == state) & (
+        df['date'] > start_date) & (df['date'] < end_date)]
+    total_recovered = int(dfff['recovered'].sum())
 
-  return format_number(total_recovered)
+    return format_number(total_recovered)
 
 
 @app.callback(
@@ -263,21 +263,21 @@ def update_total_recovered(state, start_date, end_date):
         Input('figure1-xaxis--datepicker',  component_property='end_date')
     ])
 def update_graph(state, yaxis_column_name, start_date, end_date):
-  dff = df[df['state'] == state]
-  dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
-  fig = px.bar(dfff, x="date", y=yaxis_column_name, hover_data=[
-               'totalTestResults'], title="<b>Total Covid Tests (Cummulative)</b>")
+    dff = df[df['state'] == state]
+    dfff = dff[(df['date'] > start_date) & (df['date'] < end_date)]
+    fig = px.bar(dfff, x="date", y=yaxis_column_name, hover_data=[
+                 'totalTestResults'], title="<b>Total Covid Tests (Cummulative)</b>")
 
-  fig.update_layout(
-      template='plotly_dark'
-  )
-  return fig
+    fig.update_layout(
+        template='plotly_dark'
+    )
+    return fig
 
 
 @app.callback(Output('state-selection', 'value'),
               Input('map', 'clickData'))
 def update_state(clickData):
-  return clickData['points'][0]['location']
+    return clickData['points'][0]['location']
 
 
 @app.callback(
@@ -286,25 +286,25 @@ def update_state(clickData):
 )
 def update_graph(value):
 
-  fig_test = make_subplots(specs=[[{"secondary_y": True}]])
-  possible_vals = ['negativeIncrease', 'positiveIncrease',
-                   'totalTestResultsIncrease', 'percent_negative', 'percent_positive']
-  for val in possible_vals:
-    if val in value:
-      visibility = True
-    else:
-      visibility = "legendonly"
-    fig_test.add_trace(go.Scatter(
-        x=cases['date'], y=cases[val], name=val, visible=visibility), )
+    fig_test = make_subplots(specs=[[{"secondary_y": True}]])
+    possible_vals = ['negativeIncrease', 'positiveIncrease',
+                     'totalTestResultsIncrease', 'percent_negative', 'percent_positive']
+    for val in possible_vals:
+        if val in value:
+            visibility = True
+        else:
+            visibility = "legendonly"
+        fig_test.add_trace(go.Scatter(
+            x=cases['date'], y=cases[val], name=val, visible=visibility), )
 
-  fig_test.update_layout(
-      title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark'
-  )
+    fig_test.update_layout(
+        title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark'
+    )
 
-  # Set x-axis title
-  fig_test.update_xaxes(title_text="<b>Date</b>")
+    # Set x-axis title
+    fig_test.update_xaxes(title_text="<b>Date</b>")
 
-  return fig_test
+    return fig_test
 
 
 @app.callback(
@@ -314,22 +314,35 @@ def update_graph(value):
         Input('figure1-xaxis--datepicker',  component_property='end_date')
     ])
 def display_map(start_date, end_date):
-  map_select = df[(df['date'] > start_date) & (df['date'] < end_date)]
-  map_selected_sum = map_select.groupby(
-      ["state"]).positiveIncrease.sum().reset_index()
-  fig_map = px.choropleth_mapbox(map_selected_sum, geojson=map_states, locations=map_selected_sum['state'], color='positiveIncrease',
-                                 color_continuous_scale="reds",
-                                 mapbox_style="carto-positron",
-                                 zoom=3, center={"lat": 39.0902, "lon": -99},
-                                 opacity=0.5,
-                                 labels={'positiveIncrease': 'Positive Cases'}
-                                 )
-  fig_map.update_layout(
-      margin={"r": 0, "t": 0, "l": 0, "b": 0}
-  )
+    map_select = df[(df['date'] > start_date) & (df['date'] < end_date)]
+    map_selected_sum = map_select.groupby(
+        ["state"]).positiveIncrease.sum().reset_index()
+    fig_map = px.choropleth_mapbox(map_selected_sum, geojson=map_states, locations=map_selected_sum['state'], color='positiveIncrease',
+                                   color_continuous_scale="reds",
+                                   mapbox_style="carto-darkmatter",
+                                   zoom=3, center={"lat": 39.0902, "lon": -99},
+                                   opacity=0.5,
+                                   labels={
+                                       'positiveIncrease': 'Positive Cases'}
+                                   )
+    fig_map.update_layout(
+        margin={"r": 0, "t": 0, "l": 0, "b": 0}
+    )
 
-  return fig_map
+    fig_map.update_coloraxes(colorbar=dict(xanchor="right", bgcolor='grey'))
+
+    # fig_map.update_layout(coloraxis=dict(colorbar_x=-0.5,
+    #                                      colorbar_y=0.5,
+    #                                      colorbar_thickness=20,
+    #                                      colorbar_bgcolor='#fff'))
+    # fig_map.update_layout(coloraxis_showscale=False)
+    # fig_map.update_traces(
+    #     reversescale=True,
+    #     colorbar_bgcolor="darkgrey",
+    #     selector=dict(type='choropleth'))
+
+    return fig_map
 
 
 if __name__ == '__main__':
-  app.run_server(debug=True, port='4000')
+    app.run_server(debug=True, port='4000')
