@@ -188,12 +188,10 @@ app.layout = html.Div(className='p-5', children=[
     html.Div([
         html.Div([
             y_axis_selection,
-            html.H2("Figure 1"),
             dcc.Graph(id='figure1-bar')
         ], className="six columns", style={'padding-left': '5%', 'padding-right': '5%'}), html.Br(),
 
         html.Div([
-            html.H2("Figure 2"),
             dcc.Checklist(id="label-select", options=[
                 {'label': 'Negative Increase', 'value': 'negativeIncrease'},
                 {'label': 'Positive Increase', 'value': 'positiveIncrease'},
@@ -201,7 +199,8 @@ app.layout = html.Div(className='p-5', children=[
                  'value': 'totalTestResultsIncrease'},
                 {'label': 'Percent Negative', 'value': 'percent_negative'},
                 {'label': 'Percent Positive', 'value': 'percent_positive'},
-            ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative', 'percent_positive']),
+            ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative', 'percent_positive']
+            , className="form-check", labelClassName="form-check-label", inputClassName="form-check-input", labelStyle={'display': 'inline-block', 'margin': "10px", "font-size": "12px", 'box-sizing':'border-box'}, inputStyle={'box-sizing':'border-box','display': 'inline-block',"padding": "5px", 'margin-right': "3px"}),
             dcc.Graph(id="selectable-labels"),
         ], className="six columns", style={'padding-left': '5%', 'padding-right': '5%'})
 
@@ -217,7 +216,7 @@ app.layout = html.Div(className='p-5', children=[
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
 def update_new_cases(state, start_date, end_date):
-  dff = df[(dff['state'] == state) & (
+  dff = df[(df['state'] == state) & (
       df['date'] > start_date) & (df['date'] < end_date)]
   dfff = dff
   end_date_obj = datetime.datetime.strptime(end_date.split('T')[0], '%Y-%m-%d')
@@ -274,10 +273,9 @@ def update_total_test_results(state, start_date, end_date):
     Output(component_id='total-recovered-data',
            component_property='children'),
     Input("state-selection", 'value'),
-    Input('figure1-xaxis--datepicker',  component_property='start_date'),
     Input('figure1-xaxis--datepicker',  component_property='end_date')
 )
-def update_total_recovered(state, start_date, end_date):
+def update_total_recovered(state, end_date):
   dfff = df[(df['state'] == state) & (df['date'] == end_date)]
   total_recovered = dfff['recovered']
 
