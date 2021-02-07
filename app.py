@@ -125,7 +125,7 @@ state_selection = html.Div(className='d-flex justify-content-between align-items
 
 y_axis_selection = html.Div(className='d-flex', children=[
     dcc.Dropdown(
-        style=({'width': '100%'}),
+        style=({'width': '100%', 'color': 'black'}),
         id='figure1-yaxis-column',
         options=[{'label': i, 'value': i}
                  for i in available_selectors],
@@ -135,7 +135,6 @@ y_axis_selection = html.Div(className='d-flex', children=[
 date_picker = html.Div(className='d-flex justify-content-between align-items-baseline', children=[
     html.Label(html.H4("Date Range"), style={"font-weight": "bold"}),
     dcc.DatePickerRange(
-        style=({'color': 'black'}),
         id='figure1-xaxis--datepicker',
         min_date_allowed=min(df['date']),
         max_date_allowed=max(df['date']),
@@ -192,7 +191,7 @@ app.layout = html.Div(className='p-5', children=[
             y_axis_selection,
             html.H2("Figure 1"),
             dcc.Graph(id='figure1-bar')
-        ], className="six columns", style={'padding-left': '5%', 'padding-right': '5%'}), html.Br(),
+        ], className="col-sm-6", style={'padding-left': '5%', 'padding-right': '5%'}), html.Br(),
 
         html.Div([
             html.H2("Figure 2"),
@@ -205,7 +204,7 @@ app.layout = html.Div(className='p-5', children=[
                 {'label': 'Percent Positive', 'value': 'percent_positive'},
             ], value=['negativeIncrease', 'positiveIncrease', 'totalTestResultsIncrease', 'percent_negative', 'percent_positive']),
             dcc.Graph(id="selectable-labels"),
-        ], className="six columns", style={'padding-left': '5%', 'padding-right': '5%'})
+        ], className="col-sm-6", style={'padding-left': '5%', 'padding-right': '5%'})
 
     ], className="row"),
 
