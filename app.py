@@ -244,29 +244,34 @@ def update_state(clickData):
 
 @app.callback(
     Output('selectable-labels', 'figure'),
-    [Input('label-select', 'value')]
+    [
+        Input('state-selection', component_property='value'),
+        Input('figure1-xaxis--datepicker',  component_property='start_date'),
+        Input('figure1-xaxis--datepicker',  component_property='end_date'),
+        Input('label-select', component_property='value')
+    ]
 )
-def update_graph(value):
+def update_graph(state_selection, start_date, end_date, display_list):
+    dff = cases[cases['state'] == state_selection]
+    dfff = dff[(dff['date'] > start_date) & (dff['date'] < end_date)]
 
-  fig_test = make_subplots(specs=[[{"secondary_y": True}]])
-  possible_vals = ['negativeIncrease', 'positiveIncrease',
+    fig_test = make_subplots(specs=[[{"secondary_y": True}]])
+    possible_vals = ['negativeIncrease', 'positiveIncrease',
                    'totalTestResultsIncrease', 'percent_negative', 'percent_positive']
-  for val in possible_vals:
-    if val in value:
-      visibility = True
-    else:
-      visibility = "legendonly"
-    fig_test.add_trace(go.Scatter(
-        x=cases['date'], y=cases[val], name=val, visible=visibility), )
+    for val in possible_vals:
+      if val in display_list:
+        visibility = True
+      else:
+        visibility = "legendonly"
+      fig_test.add_trace(go.Scatter(
+        x=dfff['date'], y=dfff[val], name=val, visible=visibility), )
 
-  fig_test.update_layout(
-      title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark'
-  )
+    fig_test.update_layout(title_text="<b>Daily Covid Cases with Percent Changes</b>", template='plotly_dark')
 
-  # Set x-axis title
-  fig_test.update_xaxes(title_text="<b>Date</b>")
+    # Set x-axis title
+    fig_test.update_xaxes(title_text="<b>Date</b>")
 
-  return fig_test
+    return fig_test
 
 
 @app.callback(
