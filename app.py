@@ -3,7 +3,6 @@
 # Run this app with `python app.py` and
 # visit http://127.0.0.1:8050/ in your web browser.
 
-from figures import df, cases, fig1
 import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
@@ -28,7 +27,9 @@ with urlopen('https://raw.githubusercontent.com/python-visualization/folium/mast
 # import csv
 # from urllib.request import urlopen
 # import urllib.request
-from helpers import format_us_state
+from helpers import format_us_state, format_card_header, format_number
+
+from datamodel import df, cases
 
 
 bgcolors = {
@@ -45,7 +46,7 @@ external_scripts = [
         'src': 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.core.js',
         'integrity': 'sha256-Qqd/EfdABZUcAxjOkMi8eGEivtdTkh3b65xCZL4qAQA=',
         'crossorigin': 'anonymous'
-    }
+    },
 ]
 
 # external CSS stylesheets
@@ -56,7 +57,14 @@ external_stylesheets = [
         'rel': 'stylesheet',
         'integrity': 'sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO',
         'crossorigin': 'anonymous'
-    }
+    },
+    {
+        'href': 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css',
+        'rel': 'stylesheet',
+        'integrity': 'sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf',
+        'crossorigin': 'anonymous'
+    },
+    dbc.themes.DARKLY
 ]
 
 # -------------------------------------------------------------------------------
@@ -72,25 +80,37 @@ app = dash.Dash(__name__,
 available_selectors = list(cases.columns)[1:]
 available_states = df['state'].unique()
 
-cards = [("new-cases"), ("new-deaths"),
-         ("new-hospitalized")]
+
+def generate_icon(icon_name):
+  return html.Span(
+      style=({'width': '5rem', 'height': '5rem'}),
+      children=html.I(className=f"{icon_name} fa-3x"))
 
 
-def generate_card(header):
+cards = [("new-cases", "fas fa-globe-americas"), ("new-deaths", 'fas fa-skull-crossbones'),
+         ("new-hospitalized", "fas fa-procedures"), ("total-recovered", "fas fa-heartbeat")]
+
+
+def generate_card(header, icon):
   return dbc.Card(
       [
-          dbc.CardHeader(header),
           dbc.CardBody(
-              [
-                  html.H4(className="card-title", id=f"{header}-data"),
-              ]
-          ),
+              [html.Div(className='row',
+                        children=[
+                            html.Div(className='col', children=[html.H5(format_card_header(header), className='card-title text-nowrap'),
+                                                                html.H2(className="card-stats",
+                                                                        id=f"{header}-data")]),
+                            html.Div(html.P(generate_icon(icon)),
+                                     className='col auto')
+                        ])
+               ]
+          )
       ],
-      className='mb-4',
+      style=({"border-radius": '1rem', 'width': "15%"}),
   )
 
 
-app.layout = html.Div(children=[
+app.layout = html.Div(className='p-5', children=[
     html.H1(children='A Deeper Look into the Analytics of Covid-19'),
     html.Br(),
     html.Div(children='''
@@ -113,6 +133,10 @@ app.layout = html.Div(children=[
             value='totalTestResultsIncrease')
     ]),
     html.Div(
+        children=[html.Div(className='d-flex justify-content-around mb-4',
+                           children=[generate_card(header, icon) for header, icon in cards])]
+    ),
+    html.Div(
         className='row',
         children=[
             # LEFT SIDE
@@ -122,9 +146,8 @@ app.layout = html.Div(children=[
             ),
             # RIGHT SIDE
             html.Div(
-                className='col-sm-3 d-flex flex-column',
-                children=[html.Div([generate_card(header)
-                                    for header in cards])]
+                className='col-sm-3 d-flex flex-column pt-3',
+                children=[]
             )]
     ),
     html.Br(),
@@ -184,7 +207,7 @@ def update_new_cases(state, start_date, end_date):
       df['date'] > start_date) & (df['date'] < end_date)]
   new_cases = dfff['positiveIncrease'].sum()
 
-  return new_cases
+  return format_number(new_cases)
 
 
 @app.callback(
@@ -198,7 +221,7 @@ def update_new_deaths(state, start_date, end_date):
       df['date'] > start_date) & (df['date'] < end_date)]
   new_cases = dfff['deathIncrease'].sum()
 
-  return new_cases
+  return format_number(new_cases)
 
 
 @app.callback(
@@ -213,7 +236,22 @@ def update_total_test_results(state, start_date, end_date):
       df['date'] > start_date) & (df['date'] < end_date)]
   new_cases = dfff['hospitalizedIncrease'].sum()
 
-  return new_cases
+  return format_number(new_cases)
+
+
+@app.callback(
+    Output(component_id='total-recovered-data',
+           component_property='children'),
+    Input("state-selection", 'value'),
+    Input('figure1-xaxis--datepicker',  component_property='start_date'),
+    Input('figure1-xaxis--datepicker',  component_property='end_date')
+)
+def update_total_recovered(state, start_date, end_date):
+  dfff = df[(df['state'] == state) & (
+      df['date'] > start_date) & (df['date'] < end_date)]
+  total_recovered = int(dfff['recovered'].sum())
+
+  return format_number(total_recovered)
 
 
 @app.callback(
