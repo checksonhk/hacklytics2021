@@ -67,8 +67,24 @@ state_abbr = {
 
 
 def format_us_state(abbr_state):
-    """
-    Converts abbreviated form of US States into full name
-    eg TX -> Texas
-    """
-    return state_abbr[abbr_state]
+  """
+  Converts abbreviated form of US States into full name
+  eg TX -> Texas
+  """
+  return state_abbr[abbr_state]
+
+
+def format_card_header(key):
+  """
+  formats id to headings
+  eg cool-id -> Cool Id
+  """
+  return " ".join([i.capitalize() for i in key.split("-")])
+
+
+def format_number(number):
+  """
+  Formats number wiht thousands seperator
+  eg 1000 -> 1,000
+  """
+  return "{:,d}".format(number)
